@@ -5,7 +5,7 @@ Apfamet is a [Julia](http://www.julialang.org/) package for analysing metagenome
 1. [Download and install the appropriate Julia version](http://julialang.org/downloads/) for your platform.
 2. Open the [Julia REPL](http://docs.julialang.org/en/release-0.4/manual/interacting-with-julia/).
 3. Type `Pkg.clone("https://github.com/ianpgm/apfamet", "apfamet")`
-4. Before you can start using apfamet you will need a HMMer database and place its ".hmm" file in the `apfamet/db` directory. To find out exactly where to put this database file you can use the following commands in the REPL:
+4. Before you can start using apfamet you will need a HMMer database and place its ".hmm" file in the `apfamet/db` directory. To find out how to download the most recent Pfam database and where exactly where to put this database file you can use the following commands in the REPL:
 ```
 using apfamet
 apfamet.get_pfam_database()
