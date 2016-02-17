@@ -8,6 +8,15 @@ using MultivariateStats
 #using FTPClient
 #using GZip
 
+#Using a PyCall/Biopython solution to translation for the time being due to apparent bugs in BioJulia's translate function (see https://github.com/BioJulia/Bio.jl/issues/133)
+
+include(Pkg.dir("apfamet")*"/src/pycall_translation_function.jl")
+include(Pkg.dir("apfamet")*"/src/hmmer_function.jl")
+
+
+function locate_default_database()
+	print(Pkg.dir("apfamet")*"/db/")
+end
 
 function na_to_zero(input_value)
 	if isna(input_value)
