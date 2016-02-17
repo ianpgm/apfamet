@@ -13,7 +13,7 @@ apfamet.get_pfam_database()
 
 ##Tutorial
 This flowchart provides a basic overview of apfamet's current functionality. Detailed instructions for using apfamet follow below.
-[[https://github.com/ianpgm/apfamet/blob/master/doc/apfamet_flowchart.png]]
+![apfamet flowchart](https://github.com/ianpgm/apfamet/blob/master/doc/apfamet_flowchart.png)
 
 
 ##Roadmap
