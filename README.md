@@ -82,7 +82,9 @@ To load a project that was previously saved use this command, specifying the `ba
 	myplot = apfamet.plotmodel(["MCR_alpha","Na_H_antiporter"], my_project)
 	Gadfly.draw(Gadfly.PDF("myplot.pdf",5Gadfly.inch,5Gadfly.inch),myplot)
 	```
-![apfamet flowchart](https://github.com/ianpgm/apfamet/blob/master/doc/plotmodel_example.png)
+![plotmodel()](https://github.com/ianpgm/apfamet/blob/master/doc/plotmodel_example.png)
+
+
 The above will plot the normalised (RpoB equivalent) abundance of the Pfam families of interest in each sample. The numbers at the end of each bar refer to the raw number of reads used to calculate the rpoB equivalent value. In this case, we produce the plot in PDF format - other available formats include PNG, SVG, and PS - see the [Gadfly documentation](http://gadflyjl.org/) for more guidance. The [Pfam website](http://pfam.xfam.org/) is the best resource for finding the IDs of relevant Pfam families.
 9. How about plotting your HMM abundances against one of your metadata parameters? This is how you do that:
 	
@@ -90,14 +92,14 @@ The above will plot the normalised (RpoB equivalent) abundance of the Pfam famil
 	correlplot = apfamet.plotcorrelation(["MCR_alpha","Na_H_antiporter"],:CH4_mM,my_project)
 	Gadfly.draw(Gadfly.PDF("correlplot.pdf",5Gadfly.inch,5Gadfly.inch),correlplot)
 	```
-![apfamet flowchart](https://github.com/ianpgm/apfamet/blob/master/doc/plotcorrelation_example.png)
+![plotcorrelation()](https://github.com/ianpgm/apfamet/blob/master/doc/plotcorrelation_example.png)
 10. Apfamet currently has a quick and crude principal-components-analysis method built in. It shows the two components with the most variation, but not how much variation those components actually show (like a scree plot). It's basically just good for getting a quick overview of your data. More correct multivariate statistical analysis can be carried out using Julia's [MultivariateStats package](https://github.com/JuliaStats/MultivariateStats.jl).
 	
 	```
 	pca_plot = apfamet.perform_pca(my_project)
 	Gadfly.draw(Gadfly.PDF("pca_plot.pdf",5Gadfly.inch,5Gadfly.inch),pca_plot)
 	```
-![apfamet flowchart](https://github.com/ianpgm/apfamet/blob/master/doc/performpca_example.png)
+![perform_pca()](https://github.com/ianpgm/apfamet/blob/master/doc/perform_pca_example.png)
 
 ##How apfamet's normalisation works 
 
