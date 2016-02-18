@@ -6,9 +6,12 @@ Apfamet is a [Julia](http://www.julialang.org/) package for analysing metagenome
 2. [Download and install the appropriate Julia version](http://julialang.org/downloads/) for your platform.
 3. Open the [Julia REPL](http://docs.julialang.org/en/release-0.4/manual/interacting-with-julia/).
 4. Type `Pkg.clone("https://github.com/ianpgm/apfamet", "apfamet")`
-5. Before you can start using apfamet you will need a HMMer database. The default option is to use Pfam in the `apfamet/db` database. To find out how to download the most recent Pfam database and where exactly where to put this database file you can use the following commands in the REPL: 
-`using apfamet` 
-`apfamet.get_pfam_database()` 
+5. Before you can start using apfamet you will need a HMMer database. The default option is to use Pfam in the `apfamet/db` database. To find out how to download the most recent Pfam database and where exactly where to put this database file you can use the following commands in the REPL:
+
+    ```
+    using apfamet 
+    apfamet.get_pfam_database()
+    ```
 6. To translate your sequences in all six-reading frames you will currently need to have [Python 2.X](https://www.python.org/) installed along with [Biopython](http://biopython.org/wiki/Main_Page). These dependencies will go away in future versions of apfamet.
 
 ##Tutorial
