@@ -20,18 +20,19 @@ This flowchart provides an overview of apfamet's current functionality. Detailed
 
 1. Open the Julia REPL (or Jupyter notebook if you prefer)
 2. Load the apfamet package you installed previously:
-```
-using apfamet
-```
+	
+	```
+	using apfamet
+	```
 3. Set your working directory to the location of your input (trimmed and dereplicated) sequences in fastq or fasta format and translate them in all six reading frames using the following command:
-```
-cd("/directory/with/my/sequencing_data/")
-apfamet.translate_sixframes(["metagenome_sample_1.fastq","metagenome_sample_2.fastq","metagenome_sample_3.fastq"])
-```
+	```
+	cd("/directory/with/my/sequencing_data/")
+	apfamet.translate_sixframes(["metagenome_sample_1.fastq","metagenome_sample_2.fastq","metagenome_sample_3.fastq"])
+	```
 The default sequencing format is fastq (error encoding is irrelevant since it's ignored), if your sequences are in fasta format then you can specify that as follows:
-```
-apfamet.translate_sixframes(["metagenome_sample_1.fastq","metagenome_sample_2.fastq","metagenome_sample_3.fastq"], format="fasta")
-```
+	```
+	apfamet.translate_sixframes(["metagenome_sample_1.fastq","metagenome_sample_2.fastq","metagenome_sample_3.fastq"], format="fasta")
+	```
 4. You will now have a protein fasta file for each of your input files with an extra `.faa` extension in the filename. Next comes the time-consuming step - HMMer. I imagine that many people might find it more convenient to run this step on a powerful server or cluster, but my instructions here will assume that you're doing everything on the same machine. To run your sequences against the default Pfam database, use the following command:
 ```
 apfamet.run_hmmsearch(["metagenome_sample_1.fastq.faa","metagenome_sample_2.fastq.faa","metagenome_sample_3.fastq.faa"])
