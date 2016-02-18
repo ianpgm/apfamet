@@ -100,11 +100,21 @@ To load a project that was previously saved use this command, specifying the `ba
 ![perform_pca()](https://github.com/ianpgm/apfamet/blob/master/doc/perform_pca_example.png)
 
 ##How apfamet's normalisation works 
+Apfamet uses the gene encoding RNA polymerase beta subunit (_rpoB_) to normalise counts in metagenomes. _rpoB_ is a universal, single-copy gene in prokaryotes, and thus a good basis for normalisation and comparison between data sets. There are seven pfam models apfamet uses to detect the RpoB protein sequence, these are:
+```
+["RNA_pol_Rpb2_1","RNA_pol_Rpb2_2","RNA_pol_Rpb2_3","RNA_pol_Rpb2_4","RNA_pol_Rpb2_45","RNA_pol_Rpb2_5","RNA_pol_Rpb2_6","RNA_pol_Rpb2_7"]
+```
+For each metagenomic sample, the number of reads for each of those models is found and "plotted" against the amino-acid length of each model, like so:
+
+![normalisation example](https://github.com/ianpgm/apfamet/blob/master/doc/normalisation_plot.png)
+
+Linear regression is performed (as represented by the line) using [Julia's GLM package](https://github.com/JuliaStats/GLM.jl) and the slope is taken as the value of reads/length for rpoB in that sample. Then, for every HMM found in the metagenomic sample, a reads/length figure is calculated based on the length of the HMM in the database and the number of reads that HMM hits in the metagenome. Then reads/length in the HMM is divided by reads/length in the rpoB, to define an abundance for each HMM in "rpoB equivalents". Since there's on average one rpoB in every genome, then one rpoB equivalent should be roughly equivalent to every genome in the metagenome having one copy of that HMM (on average). This unit (rpoB) makes metagenomes comparable based on a natural internal standard, in spite of different numbers of reads, qualities, and other variations from sample to sample.
 
 ##Roadmap
 Features planned for apfamet in the future include:
 
 + Pearson correlation between model abundance and metadata variables.
++ A function to split projects based on metadata, sets of HMMs, and sets of sample IDs. Also a function to merge projects.
 + Pairwise hypothesis testing to check for significant differences between groups of samples.
 + A search function for the HMM database, to search descriptions for keywords of interest
 + A function to export all reads with hits to a given model or set of models
