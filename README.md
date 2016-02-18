@@ -46,11 +46,11 @@ There are a lot more optional variables that you can specify for `apfamet.run_hm
 	apfamet.run_hmmsearch(input_filenames; db_filename=joinpath(Pkg.dir("apfamet"),"db","Pfam-A.hmm"), cores="1", sampleIDs=[], project_table_file = "apfamet_project_table.txt", overwrite=false)
 	```
 	
-..* `db_filename` the path of another hmm file if you don't want to use the default (most recent Pfam-A)
-..* `cores` to use more cores and make hmmsearch go faster
-..* `sampleIDs` to specify IDs for each of your sample (in the same order as the faa files for each of those samples). The default will be to number them starting from 1. You can also choose to change these sample IDs later
-..* `project_table_file` this is the input file for later steps - you will edit this to include metadata at a later point. The default filename is "apfamet_project_table.txt", but it will probably make more sense to choose a name that describes the collection of files you are processing.
-..* `overwrite` self-explanatory - if there's already output files with the names you've specified, should apfamet overwrite them? The default is not to overwrite them and generate an error.
+	..* `db_filename` the path of another hmm file if you don't want to use the default (most recent Pfam-A)
+	..* `cores` to use more cores and make hmmsearch go faster
+	..* `sampleIDs` to specify IDs for each of your sample (in the same order as the faa files for each of those samples). The default will be to number them starting from 1. You can also choose to change these sample IDs later
+	..* `project_table_file` this is the input file for later steps - you will edit this to include metadata at a later point. The default filename is "apfamet_project_table.txt", but it will probably make more sense to choose a name that describes the collection of files you are processing.
+	..* `overwrite` self-explanatory - if there's already output files with the names you've specified, should apfamet overwrite them? The default is not to overwrite them and generate an error.
 5. You can now add metadata (for example, geochemical data) to your project table file - each parameter is a new column, with a name (no spaces) you give it in the header. This can be achieved by opening your project table file ("apfamet_project_table.txt" if you used the default) in a text editor (by putting tabs between the columns on each line) or Excel. [Click here](https://github.com/ianpgm/apfamet/blob/master/test/sample_metadata.txt) to see an example of this file. 
 6. Now you need to read the hmmsearch results into Julia and carry out normalisation of the read counts. You need to find a temporary name for your project (`my_project` in this example) and run the following command (assuming default options were used in `run_hmmsearch()`):
 	
