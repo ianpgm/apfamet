@@ -45,6 +45,7 @@ There are a lot more optional variables that you can specify for `apfamet.run_hm
 	```
 	apfamet.run_hmmsearch(input_filenames; db_filename=joinpath(Pkg.dir("apfamet"),"db","Pfam-A.hmm"), cores="1", sampleIDs=[], project_table_file = "apfamet_project_table.txt", overwrite=false)
 	```
+	
 ..* `db_filename` the path of another hmm file if you don't want to use the default (most recent Pfam-A)
 ..* `cores` to use more cores and make hmmsearch go faster
 ..* `sampleIDs` to specify IDs for each of your sample (in the same order as the faa files for each of those samples). The default will be to number them starting from 1. You can also choose to change these sample IDs later
