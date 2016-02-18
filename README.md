@@ -76,16 +76,13 @@ To load a project that was previously saved use this command, specifying the `ba
 	```
 	my_project = load_project("my_apfamet_project")
 	```
-8. Now you have your project run through hmmsearch, loaded into memory and ready to analyse. To start out, why don't we try plotting the abundances of some Pfam models.
+8. Now you have your project run through hmmsearch, loaded into memory and ready to analyse. To start out, why don't we try plotting the abundances of some Pfam models. The command below will plot the normalised (RpoB equivalent) abundance of the Pfam families of interest in each sample. The numbers at the end of each bar refer to the raw number of reads used to calculate the rpoB equivalent value. In this case, we produce the plot in PDF format - other available formats include PNG, SVG, and PS - see the [Gadfly documentation](http://gadflyjl.org/) for more guidance. The [Pfam website](http://pfam.xfam.org/) is the best resource for finding the IDs of relevant Pfam families.
 	
 	```
 	myplot = apfamet.plotmodel(["MCR_alpha","Na_H_antiporter"], my_project)
 	Gadfly.draw(Gadfly.PDF("myplot.pdf",5Gadfly.inch,5Gadfly.inch),myplot)
 	```
 ![plotmodel()](https://github.com/ianpgm/apfamet/blob/master/doc/plotmodel_example.png)
-
-
-The above will plot the normalised (RpoB equivalent) abundance of the Pfam families of interest in each sample. The numbers at the end of each bar refer to the raw number of reads used to calculate the rpoB equivalent value. In this case, we produce the plot in PDF format - other available formats include PNG, SVG, and PS - see the [Gadfly documentation](http://gadflyjl.org/) for more guidance. The [Pfam website](http://pfam.xfam.org/) is the best resource for finding the IDs of relevant Pfam families.
 9. How about plotting your HMM abundances against one of your metadata parameters? This is how you do that:
 	
 	```
