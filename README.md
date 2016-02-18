@@ -25,22 +25,26 @@ This flowchart provides an overview of apfamet's current functionality. Detailed
 	using apfamet
 	```
 3. Set your working directory to the location of your input (trimmed and dereplicated) sequences in fastq or fasta format and translate them in all six reading frames using the following command:
+	
 	```
 	cd("/directory/with/my/sequencing_data/")
 	apfamet.translate_sixframes(["metagenome_sample_1.fastq","metagenome_sample_2.fastq","metagenome_sample_3.fastq"])
 	```
 The default sequencing format is fastq (error encoding is irrelevant since it's ignored), if your sequences are in fasta format then you can specify that as follows:
+	
 	```
 	apfamet.translate_sixframes(["metagenome_sample_1.fastq","metagenome_sample_2.fastq","metagenome_sample_3.fastq"], format="fasta")
 	```
 4. You will now have a protein fasta file for each of your input files with an extra `.faa` extension in the filename. Next comes the time-consuming step - HMMer. I imagine that many people might find it more convenient to run this step on a powerful server or cluster, but my instructions here will assume that you're doing everything on the same machine. To run your sequences against the default Pfam database, use the following command:
-```
-apfamet.run_hmmsearch(["metagenome_sample_1.fastq.faa","metagenome_sample_2.fastq.faa","metagenome_sample_3.fastq.faa"])
-```
+	
+	```
+	apfamet.run_hmmsearch(["metagenome_sample_1.fastq.faa","metagenome_sample_2.fastq.faa","metagenome_sample_3.fastq.faa"])
+	```
 There are a lot more optional variables that you can specify for `apfamet.run_hmmsearch`, this is the complete function:
-```
-apfamet.run_hmmsearch(input_filenames; db_filename=joinpath(Pkg.dir("apfamet"),"db","Pfam-A.hmm"), cores="1", sampleIDs=[], project_table_file = "apfamet_project_table.txt", overwrite=false)
-```
+	
+	```
+	apfamet.run_hmmsearch(input_filenames; db_filename=joinpath(Pkg.dir("apfamet"),"db","Pfam-A.hmm"), cores="1", sampleIDs=[], project_table_file = "apfamet_project_table.txt", overwrite=false)
+	```
 ..* `db_filename` the path of another hmm file if you don't want to use the default (most recent Pfam-A)
 ..* `cores` to use more cores and make hmmsearch go faster
 ..* `sampleIDs` to specify IDs for each of your sample (in the same order as the faa files for each of those samples). The default will be to number them starting from 1. You can also choose to change these sample IDs later
@@ -48,44 +52,52 @@ apfamet.run_hmmsearch(input_filenames; db_filename=joinpath(Pkg.dir("apfamet"),"
 ..* `overwrite` self-explanatory - if there's already output files with the names you've specified, should apfamet overwrite them? The default is not to overwrite them and generate an error.
 5. You can now add metadata (for example, geochemical data) to your project table file - each parameter is a new column, with a name (no spaces) you give it in the header. This can be achieved by opening your project table file ("apfamet_project_table.txt" if you used the default) in a text editor (by putting tabs between the columns on each line) or Excel. [Click here](https://github.com/ianpgm/apfamet/blob/master/test/sample_metadata.txt) to see an example of this file. 
 6. Now you need to read the hmmsearch results into Julia and carry out normalisation of the read counts. You need to find a temporary name for your project (`my_project` in this example) and run the following command (assuming default options were used in `run_hmmsearch()`):
-```
-my_project = apfamet.new_project()
-```
+	
+	```
+	my_project = apfamet.new_project()
+	```
 If you used a non-default HMM database or name for your project table file, these can be specified as follows:
-```
-my_project = apfamet.new_project(project_table_file="my_apfamet_project_table.txt", hmm_database="my_special_database.hmm")
-```
+	
+	```
+	my_project = apfamet.new_project(project_table_file="my_apfamet_project_table.txt", hmm_database="my_special_database.hmm")
+	```
 7. The first thing you should do once you make a new project is to save it to your hard drive. The following command will save four files to your working directory called "apfamet_project.apfamet_project_table", "apfamet_project.apfamet_read_counts_table", "apfamet_project.apfamet_hmm_database_info","apfamet_project.apfamet_rpoB_equiv_table". Each of these files are tab-delimited text files suitable for import into other programs (R, Excel, etc.).
-```
-apfamet.save_project(my_project)
-```
+	
+	```
+	apfamet.save_project(my_project)
+	```
 You can also specify a base filename other than the default and allow overwriting existing files with the same name as follows:
-```
-save_project(base_filename="my_apfamet_project", overwrite=true)
-```
+	
+	```
+	save_project(base_filename="my_apfamet_project", overwrite=true)
+	```
 To load a project that was previously saved use this command, specifying the `base_filename` prefix specified in the `save_project()` function:
-```
-my_project = load_project("my_apfamet_project")
-```
+	
+	```
+	my_project = load_project("my_apfamet_project")
+	```
 8. Now you have your project run through hmmsearch, loaded into memory and ready to analyse. To start out, why don't we try plotting the abundances of some Pfam models.
-```
-myplot = apfamet.plotmodel(["MCR_alpha","Na_H_antiporter"], my_project)
-Gadfly.draw(Gadfly.PDF("myplot.pdf",5Gadfly.inch,5Gadfly.inch),myplot)
-```
+	
+	```
+	myplot = apfamet.plotmodel(["MCR_alpha","Na_H_antiporter"], my_project)
+	Gadfly.draw(Gadfly.PDF("myplot.pdf",5Gadfly.inch,5Gadfly.inch),myplot)
+	```
 ![apfamet flowchart](https://github.com/ianpgm/apfamet/blob/master/doc/plotmodel_example.png)
 The above will plot the normalised (RpoB equivalent) abundance of the Pfam families of interest in each sample. The numbers at the end of each bar refer to the raw number of reads used to calculate the rpoB equivalent value. In this case, we produce the plot in PDF format - other available formats include PNG, SVG, and PS - see the [Gadfly documentation](http://gadflyjl.org/) for more guidance. The [Pfam website](http://pfam.xfam.org/) is the best resource for finding the IDs of relevant Pfam families.
 9. How about plotting your HMM abundances against one of your metadata parameters? This is how you do that:
-```
-correlplot = apfamet.plotcorrelation(["MCR_alpha","Na_H_antiporter"],:CH4_mM,my_project)
-Gadfly.draw(Gadfly.PDF("correlplot.pdf",5Gadfly.inch,5Gadfly.inch),correlplot)
-```
+	
+	```
+	correlplot = apfamet.plotcorrelation(["MCR_alpha","Na_H_antiporter"],:CH4_mM,my_project)
+	Gadfly.draw(Gadfly.PDF("correlplot.pdf",5Gadfly.inch,5Gadfly.inch),correlplot)
+	```
 ![apfamet flowchart](https://github.com/ianpgm/apfamet/blob/master/doc/plotcorrelation_example.png)
 10. Apfamet currently has a quick and crude principal-components-analysis method built in. It shows the two components with the most variation, but not how much variation those components actually show (like a scree plot). It's basically just good for getting a quick overview of your data. More correct multivariate statistical analysis can be carried out using Julia's [MultivariateStats package](https://github.com/JuliaStats/MultivariateStats.jl).
-```
-pca_plot = apfamet.perform_pca(my_project)
-Gadfly.draw(Gadfly.PDF("pca_plot.pdf",5Gadfly.inch,5Gadfly.inch),pca_plot)
-```
-
+	
+	```
+	pca_plot = apfamet.perform_pca(my_project)
+	Gadfly.draw(Gadfly.PDF("pca_plot.pdf",5Gadfly.inch,5Gadfly.inch),pca_plot)
+	```
+![apfamet flowchart](https://github.com/ianpgm/apfamet/blob/master/doc/performpca_example.png)
 
 ##How apfamet's normalisation works 
 
