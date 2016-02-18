@@ -15,7 +15,7 @@ include(Pkg.dir("apfamet")*"/src/hmmer_function.jl")
 
 
 function locate_default_database()
-	print(Pkg.dir("apfamet")*"/db/")
+	print(joinpath(Pkg.dir("apfamet"),"db"))
 end
 
 function na_to_zero(input_value)
@@ -33,21 +33,35 @@ function dict_to_df(input_dict, ID)
 end
 
 function read_hmm_tabular_output(filename, ID)
-	Pfam_dict = Dict()
 	hmm_output = open(filename)
+	matched_sequences_dict = Dict()
 	for line in eachline(hmm_output)
 		if startswith(line, ['#'])
 			continue
 		else
 			split_line = split(line)
 			family = split_line[3]
-			if haskey(Pfam_dict, family)
-				Pfam_dict[family] = Pfam_dict[family] + 1
+			best_domain_evalue = float(split_line[8])
+			target_sequence_name = join(split(split_line[1], '.')[1:end-1],'.')
+			if haskey(matched_sequences_dict, target_sequence_name)
+				if best_domain_evalue < matched_sequences_dict[target_sequence_name][1]
+					matched_sequences_dict[target_sequence_name] = [best_domain_evalue,family]
+				end
 			else
-				Pfam_dict[family] = Int64(1)
+				matched_sequences_dict[target_sequence_name] = [best_domain_evalue,family]
 			end
 		end
 	end
+	Pfam_dict = Dict()
+	for sequence in matched_sequences_dict
+		family = sequence[2][2]
+		if haskey(Pfam_dict, family)
+			Pfam_dict[family] = Pfam_dict[family] + 1
+		else
+			Pfam_dict[family] = 1
+		end
+	end
+	
 	return dict_to_df(Pfam_dict, ID)
 end
 
@@ -134,7 +148,11 @@ function reads_to_rpob_equiv(pfam_df, pfam_db_stats)
 	for rownum in 1:size(pfam_df)[1]
 		model_name = pfam_df[rownum,:PFAM_Model]
 		readnums = Array(pfam_df[rownum,2:size(pfam_df)[2]])
-		pfam_length = float(pfam_db_stats[pfam_db_stats[:NAME] .== model_name, :LENG][1])
+		if 	model_name in pfam_db_stats[:NAME]
+			pfam_length = float(pfam_db_stats[pfam_db_stats[:NAME] .== model_name, :LENG][1])
+		else
+			error("At least one of the models in your hmmsearch output wasn't in the specified HMM database. Are you sure that the same HMM database was specified for both the run_hmmsearch() step and the new_project() step?\n")
+		end
 		reads_per_aa = []
 		for readnum in readnums
 			push!(reads_per_aa, readnum / pfam_length)
@@ -152,7 +170,7 @@ function reads_to_rpob_equiv(pfam_df, pfam_db_stats)
 	return rpoB_table_output
 end
 
-function new_project(project_table_file, hmm_database="")
+function new_project(;project_table_file="apfamet_project_table.txt", hmm_database="")
 	project_table = readtable(project_table_file, separator='\t')
 	read_counts_table = import_hmm_output(project_table)
 	hmm_database_info = prepare_pfam_database(hmm_database)
@@ -160,7 +178,14 @@ function new_project(project_table_file, hmm_database="")
 	return Dict("project_table"=>project_table,"read_counts_table"=>read_counts_table,"hmm_database_info"=>hmm_database_info,"rpoB_equiv_table"=>rpoB_equiv_table)
 end
 
-function save_project(project, base_filename="apfamet_project")
+function save_project(project; base_filename="apfamet_project", overwrite=false)
+	if isfile(base_filename)
+		if overwrite == false
+			error("Project "*base_filename*" already exists. Please select a new filename or set overwrite=true")
+		else
+			print("Overwriting previous project "*base_filename*" because overwrite=true.")
+		end
+	end
 	writetable(base_filename*".apfamet_project_table", project["project_table"], separator='\t')
 	writetable(base_filename*".apfamet_read_counts_table", project["read_counts_table"], separator='\t')
 	writetable(base_filename*".apfamet_hmm_database_info", project["hmm_database_info"], separator='\t')
@@ -182,18 +207,20 @@ function plotmodel(modelnames, project)
 	rpoB_eq_table = project["rpoB_equiv_table"]
 	reads_table = project["read_counts_table"]
 	hmm_database_info = project["hmm_database_info"]
-	sample_names = project["project_table"][:SampleID]
+	sample_names = map(string,names(project["rpoB_equiv_table"])[2:end])
 	
     #Getting data out of the big table and putting it into a small data frame using the melt command to pivot that dataframe
     for (i, modelname) in enumerate(modelnames)
         single_model = melt(rpoB_eq_table[rpoB_eq_table[:PFAM_Model] .== modelname, :], :PFAM_Model)
         single_model_reads = melt(reads_table[reads_table[:PFAM_Model] .== modelname, :], :PFAM_Model)
+		
         single_reads = []
         for readnum in single_model_reads[:value]
             push!(single_reads,string(readnum))
         end
         single_model[:reads] = single_reads
         single_model[:sample] = sample_names
+		single_model[:PFAM_full] = hmm_database_info[hmm_database_info[:NAME] .== modelname, :DESC][1]
     relative_plot_position = 1:length(sample_names)
     relative_plot_position = relative_plot_position + 0.5 - i*(1/length(modelnames))
     single_model[:read_plot_pos] = relative_plot_position
@@ -209,7 +236,7 @@ function plotmodel(modelnames, project)
     end
     
     #plotting
-    modelplot = plot(all_data_to_plot, x=:value,y=:sample, colour=:PFAM_Model, Geom.bar(position=:dodge,orientation=:horizontal),
+    modelplot = plot(all_data_to_plot, x=:value,y=:sample, colour=:PFAM_full, Geom.bar(position=:dodge,orientation=:horizontal),
     Guide.ylabel(""),
     Guide.xlabel("rpoB equivalents"),
     	Theme(bar_highlight=color(colorant"black"),
@@ -234,7 +261,7 @@ end
 function perform_pca(project)
 	
 	rpoB_eq_table = project["rpoB_equiv_table"]
-	sample_names = project["project_table"][:SampleID]
+	sample_names = map(string,names(project["rpoB_equiv_table"])[2:end])
 	
 	rpoB_eq_matrix = convert(Array, rpoB_eq_table)
 	rpoB_eq_matrix_converted = convert(Array{Float64,2},rpoB_eq_matrix[:,2:end])
@@ -260,7 +287,7 @@ function plotcorrelation(modelnames,parameter,project)
     #Getting data out of the big table and putting it into a small data frame using the melt command to pivot that dataframe
     for modelname in modelnames
         single_model = melt(rpoB_eq_table[rpoB_eq_table[:PFAM_Model] .== modelname, :], :PFAM_Model)
-        single_model[:param] = metadata_table[parameter]
+        single_model[:param] = reverse(metadata_table[parameter])
         single_model[:PFAM_full] = hmm_database_info[hmm_database_info[:NAME] .== modelname, :DESC][1]
         push!(data_to_plot, single_model)
 	end
@@ -295,7 +322,7 @@ end
 
 function prepare_pfam_database(path_to_pfam_database="")
 	if path_to_pfam_database==""
-		path_to_pfam_database = Pkg.dir("apfamet")*"/db/Pfam-A.hmm"
+		path_to_pfam_database = joinpath(Pkg.dir("apfamet"),"db","Pfam-A.hmm")
 	end
 	pfam_stats_df = DataFrame(NAME=[],DESC=[],LENG=[])
 	pfam_file = open(path_to_pfam_database)
@@ -315,7 +342,7 @@ end
 function get_pfam_database()
 	current_pfam_url = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/"
 	current_pfam_file = "Pfam-A.hmm.gz"
-	target_location = Pkg.dir("apfamet")*"/db/"
+	target_location = joinpath(Pkg.dir("apfamet"),"db")
 	
 	print("This function is not yet working. Please download the file "*current_pfam_url*current_pfam_file*", unzip it and place it in "*target_location*".\n\nLinux and MacOS X users can use the following commands from the shell (not the Julia REPL - hit ';' to access the shell from within the Julia REPL):\ncurl "*current_pfam_url*current_pfam_file*" -o "*target_location*current_pfam_file*"\ngunzip "*target_location*current_pfam_file*"\n")
 	
