@@ -43,33 +43,48 @@ function read_hmm_tabular_output(filename, ID)
 			family = split_line[3]
 			best_domain_evalue = float(split_line[8])
 			target_sequence_name = join(split(split_line[1], '.')[1:end-1],'.')
+			translation_frame = split(split_line[1], '.')[end]
 			if haskey(matched_sequences_dict, target_sequence_name)
 				if best_domain_evalue < matched_sequences_dict[target_sequence_name][1]
-					matched_sequences_dict[target_sequence_name] = [best_domain_evalue,family]
+					matched_sequences_dict[target_sequence_name] = [best_domain_evalue,family,translation_frame]
 				end
 			else
-				matched_sequences_dict[target_sequence_name] = [best_domain_evalue,family]
+				matched_sequences_dict[target_sequence_name] = [best_domain_evalue,family,translation_frame]
 			end
 		end
 	end
 	Pfam_dict = Dict()
+	seq_df = DataFrame()
 	for sequence in matched_sequences_dict
+		newline_seq_df = DataFrame()
 		family = sequence[2][2]
 		if haskey(Pfam_dict, family)
 			Pfam_dict[family] = Pfam_dict[family] + 1
+			newline_seq_df = DataFrame(seqID = sequence[1], translation = sequence[2][3], model = family, evalue = sequence[2][1])
 		else
 			Pfam_dict[family] = 1
+			newline_seq_df = DataFrame(seqID = sequence[1], translation = sequence[2][3], model = family, evalue = sequence[2][1])
 		end
+		seq_df = vcat(seq_df, newline_seq_df)
 	end
 	
-	return dict_to_df(Pfam_dict, ID)
+	output_dict = Dict()
+	output_dict["pfam_df"] = dict_to_df(Pfam_dict, ID)
+	output_dict["seq_df"] = seq_df
+	
+	return output_dict
 end
 
 function add_newsample_to_pfam_table(filenames, IDs, pfam_table)
 	new_pfam_table = pfam_table
+	full_seq_df = DataFrame()
 	for (i, filename) in enumerate(filenames)
+		print("Reading "*filename*"\n")
 		column_to_add = read_hmm_tabular_output(filename, IDs[i])
-		new_pfam_table = join(column_to_add, new_pfam_table, on = :PFAM_Model, kind = :outer)
+		new_pfam_table = join(column_to_add["pfam_df"], new_pfam_table, on = :PFAM_Model, kind = :outer)
+		seq_df = column_to_add["seq_df"]
+		seq_df[:Sample] = fill(IDs[i], size(seq_df,1))
+		full_seq_df = vcat(full_seq_df, seq_df)
 	end
 #	for i in 1:size(new_pfam_table,1)
 #		for j in 1:size(new_pfam_table,2)
@@ -83,13 +98,10 @@ function add_newsample_to_pfam_table(filenames, IDs, pfam_table)
 			new_pfam_table[column][i] = na_to_zero(value)
 		end
 	end
-	return new_pfam_table
-end
-
-function import_hmm_output(project_table)
-	blank_table = DataFrame(PFAM_Model=[])
-	pfam_table = add_newsample_to_pfam_table(project_table[:Filename],project_table[:SampleID],blank_table)
-	return pfam_table
+	output_dict = Dict()
+	output_dict["new_pfam_table"] = new_pfam_table
+	output_dict["seq_df"] = full_seq_df
+	return output_dict
 end
 
 function dfsearch(df, colname, searchterm)
@@ -170,12 +182,27 @@ function reads_to_rpob_equiv(pfam_df, pfam_db_stats)
 	return rpoB_table_output
 end
 
+#function import_hmm_output(project_table)
+#	blank_table = DataFrame(PFAM_Model=[])
+#	pfam_table = add_newsample_to_pfam_table(project_table[:Filename],project_table[:SampleID],blank_table)
+#	output_dict = Dict()
+#	output_dict["pfam_table"] = pfam_table["new_pfam_table"]
+#	output_dict["seq_df"] = pfam_table[seq_df]
+#	return output_dict
+#end
+
+
 function new_project(;project_table_file="apfamet_project_table.txt", hmm_database="")
 	project_table = readtable(project_table_file, separator='\t')
-	read_counts_table = import_hmm_output(project_table)
+	
+	blank_table = DataFrame(PFAM_Model=[])
+	pfam_table = add_newsample_to_pfam_table(project_table[:Filename],project_table[:SampleID],blank_table)
+	read_counts_table = pfam_table["new_pfam_table"]
+	seq_info_table = pfam_table["seq_df"]
+	
 	hmm_database_info = prepare_pfam_database(hmm_database)
 	rpoB_equiv_table = reads_to_rpob_equiv(read_counts_table, hmm_database_info)
-	return Dict("project_table"=>project_table,"read_counts_table"=>read_counts_table,"hmm_database_info"=>hmm_database_info,"rpoB_equiv_table"=>rpoB_equiv_table)
+	return Dict("project_table"=>project_table,"read_counts_table"=>read_counts_table,"hmm_database_info"=>hmm_database_info,"rpoB_equiv_table"=>rpoB_equiv_table, "seq_info_table"=>seq_info_table)
 end
 
 function save_project(project; base_filename="apfamet_project", overwrite=false)
