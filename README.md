@@ -98,6 +98,16 @@ To load a project that was previously saved use this command, specifying the `ba
 	Gadfly.draw(Gadfly.PDF("pca_plot.pdf",5Gadfly.inch,5Gadfly.inch),pca_plot)
 	```
 ![perform_pca()](https://github.com/ianpgm/apfamet/blob/master/doc/perform_pca_example.png)
+10. You may want to extract reads, or translated nucleotide reads in the relevant translation frame, for a subset of your input data based on the models that it hit. This can be done using the following commands, for nucleotide sequences and amino acid sequences respectively. Be sure to point to the correct file name (original reads file for nt, translated reads for aa):
+	```
+	#The functions are:
+	apfamet.extract_nt_seqs(models,project,filenames,output;format="fastq")
+	apfamet.extract_aa_seqs(models,project,filenames,output;format="fasta")
+	#Note that the default file type for nt is fastq (can be changed to fasta be specifying it with format=), for aa the default is fasta. Examples of use are below - these examples show use of a single fasta source file, you can add more source files by placing commas in between the filenames inside the square brackets.
+	
+	apfamet.extract_nt_seqs(["RNA_pol_Rpb2_1","RNA_pol_Rpb2_2"],myproject,["../../processed_nt/59E-13-B_vsearch_scythe_pear.fastq.assembled.fasta"],"rpoB-1-site59_test_extract.fasta", format="fasta")
+	apfamet.extract_aa_seqs(["RNA_pol_Rpb2_1"],myproject,["../../translated_sequences/59E-13-B_vsearch_scythe_pear.fastq.assembled.fasta.faa"],"rpoB-1-site59_test_extract.faa")
+	```
 
 ##How apfamet's normalisation works 
 Apfamet uses the gene encoding RNA polymerase beta subunit (_rpoB_) to normalise counts in metagenomes. _rpoB_ is a universal, single-copy gene in prokaryotes, and thus a good basis for normalisation and comparison between data sets. There are seven pfam models apfamet uses to detect the RpoB protein sequence, these are:
