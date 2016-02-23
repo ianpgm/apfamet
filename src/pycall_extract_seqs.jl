@@ -22,6 +22,7 @@ function extract_nt_seqs(models,project,filenames,output;format="fastq")
 	for model in models
 		append!(seqs_to_retrieve, project["seq_info_table"][project["seq_info_table"][:model] .== model, :seqID])
 	end
+	print(seqs_to_retrieve)
 	output_sequences = extract_seqs(seqs_to_retrieve, filenames, format)
 	output_handle = __builtin__.open(output, "w")
 	SeqIO.write(output_sequences,output_handle,format)
