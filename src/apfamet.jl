@@ -15,7 +15,7 @@ include(joinpath(Pkg.dir("apfamet"),"src","pycall_translation_function.jl"))
 include(joinpath(Pkg.dir("apfamet"),"src","hmmer_function.jl"))
 include(joinpath(Pkg.dir("apfamet"),"src","pycall_extract_seqs.jl"))
 include(joinpath(Pkg.dir("apfamet"),"src","plotting.jl"))
-
+include(joinpath(Pkg.dir("apfamet"),"src","sub_project.jl"))
 
 
 function locate_default_database()
