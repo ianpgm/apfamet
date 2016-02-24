@@ -1,7 +1,7 @@
 julia 0.4
 Bio 0.1.0
 DataFrames 0.6.10
-GLM 0.5.0
+GLM 0.4.8
 Gadfly 0.4.2
 Compose 0.4.0
 MultivariateStats 0.2.1
