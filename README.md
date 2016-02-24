@@ -149,7 +149,6 @@ Linear regression is performed (as represented by the line) using [Julia's GLM p
 Features planned for apfamet in the future include:
 
 + Pearson correlation between model abundance and metadata variables.
-+ A function to split projects based on metadata, sets of HMMs, and sets of sample IDs. Also a function to merge projects.
 + Pairwise hypothesis testing to check for significant differences between groups of samples.
 + A search function for the HMM database, to search descriptions for keywords of interest
 + Assembled data - checking for HMM abundance in assembled data is faster than checking every read, and data sets are getting too big for the read-based approach. That's why I would like to be able to use apfamet to combine assembled data with coverage information for analysis of assembled data.
