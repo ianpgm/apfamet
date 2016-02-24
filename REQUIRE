@@ -5,3 +5,4 @@ GLM 0.4.8
 Gadfly 0.4.0
 Compose 0.4.0
 MultivariateStats 0.2.1
+PyCall 1.4.0

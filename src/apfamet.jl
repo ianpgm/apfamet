@@ -258,7 +258,7 @@ function get_pfam_database()
 	current_pfam_file = "Pfam-A.hmm.gz"
 	target_location = joinpath(Pkg.dir("apfamet"),"db")
 	
-	print("This function is not yet working. Please download the file "*current_pfam_url*current_pfam_file*", unzip it and place it in "*target_location*".\n\nLinux and MacOS X users can use the following commands from the shell (not the Julia REPL - hit ';' to access the shell from within the Julia REPL):\ncurl "*current_pfam_url*current_pfam_file*" -o "*target_location*current_pfam_file*"\ngunzip "*target_location*current_pfam_file*"\n")
+	print("This function is not yet working. Please download the file "*current_pfam_url*current_pfam_file*", unzip it and place it in "*target_location*".\n\nLinux and MacOS X users can use the following commands from the shell (not the Julia REPL - hit ';' to access the shell from within the Julia REPL):\ncurl "*current_pfam_url*current_pfam_file*" -o "joinpath(target_location,current_pfam_file)"\ngunzip "joinpath(target_location,current_pfam_file)"\n")
 	
 #	print("Downloading current release of the Pfam database from "*current_pfam_url*"Pfam-A.hmm.gz\n")
 	
