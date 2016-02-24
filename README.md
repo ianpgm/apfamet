@@ -98,7 +98,7 @@ To load a project that was previously saved use this command, specifying the `ba
 	Gadfly.draw(Gadfly.PDF("pca_plot.pdf",5Gadfly.inch,5Gadfly.inch),pca_plot)
 	```
 ![perform_pca()](https://github.com/ianpgm/apfamet/blob/master/doc/perform_pca_example.png)
-10. You may want to extract reads, or translated nucleotide reads in the relevant translation frame, for a subset of your input data based on the models that it hit. This can be done using the following commands, for nucleotide sequences and amino acid sequences respectively. Be sure to point to the correct file name (original reads file for nt, translated reads for aa):
+11. You may want to extract reads, or translated nucleotide reads in the relevant translation frame, for a subset of your input data based on the models that it hit. This can be done using the following commands, for nucleotide sequences and amino acid sequences respectively. Be sure to point to the correct file name (original reads file for nt, translated reads for aa):
 	```
 	#The functions are:
 	apfamet.extract_nt_seqs(models,project,filenames,output;format="fastq")
@@ -108,6 +108,31 @@ To load a project that was previously saved use this command, specifying the `ba
 	apfamet.extract_nt_seqs(["RNA_pol_Rpb2_1","RNA_pol_Rpb2_2"],myproject,["../../processed_nt/59E-13-B_vsearch_scythe_pear.fastq.assembled.fasta"],"rpoB-1-site59_test_extract.fasta", format="fasta")
 	apfamet.extract_aa_seqs(["RNA_pol_Rpb2_1"],myproject,["../../translated_sequences/59E-13-B_vsearch_scythe_pear.fastq.assembled.fasta.faa"],"rpoB-1-site59_test_extract.faa")
 	```
+12. You may want to split up a project into several sub-projects each containing different samples, or merge projects together. This can be done as follows. To make a sub project with certain samples that you define, use the following function:
+	```
+	apfamet.sub_project_by_sample(project, sample_names)
+	#For example:
+	subproject1 = apfamet.sub_project_by_sample(myproject, ["sample1","sample3"])
+	```
+	To split up a project based on HMM models, you can use the following function. Note - if you make a subproject with models that were completely undetected in one of your samples, that sample will still be included, just recording that nothing's there (all values being 0):
+	```
+	apfamet.sub_project_by_model(project, model_names)
+	#For example:
+	subproject1 = apfamet.sub_project_by_model(myproject, ["RNA_pol_Rpb2_1","RNA_pol_Rpb2_6"])
+	```
+	You may wish to use your metadata to make a subproject - every sample which is above or below a certain threshold, or that you have tagged in a certain way with a keyword, can be put into a subproject. Allowed operators for comparing to metadata include `:.>` (greater than), `:.<` (less than), `:.==` (equal to), `:.!=` (not equal to), `:.>=` (greater than or equal to), `:.<=` (less than or equal to).
+	```
+	apfamet.sub_project_by_metadata(project, parameter, operator, value)
+	#For example, to make a subproject with all samples where salinity is greater than 10, for this project where salinity was measured at the time of sample collection and included in the project table file when new_project was run:
+	subproject1 = apfamet.sub_project_by_metadata(myproject,:Salinity,:.>,10)
+	#You can also use keywords in your project_table to easily make subprojects easy later. Let's say that we had marked certain samples as "marine" under :Type, then we could extract those using:
+	subproject2 = apfamet.sub_project_by_metadata(myproject,:Type,:.==,"marine")
+	```
+	Once you have multiple subprojects you may wish to combine them again. This can be achieved with the following function:
+	```
+	combined_project = apfamet.merge_projects(project1, project2)
+	```
+	
 
 ##How apfamet's normalisation works 
 Apfamet uses the gene encoding RNA polymerase beta subunit (_rpoB_) to normalise counts in metagenomes. _rpoB_ is a universal, single-copy gene in prokaryotes, and thus a good basis for normalisation and comparison between data sets. There are seven pfam models apfamet uses to detect the RpoB protein sequence, these are:
