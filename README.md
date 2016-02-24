@@ -114,12 +114,14 @@ To load a project that was previously saved use this command, specifying the `ba
 	#For example:
 	subproject1 = apfamet.sub_project_by_sample(myproject, ["sample1","sample3"])
 	```
+	
 	To split up a project based on HMM models, you can use the following function. Note - if you make a subproject with models that were completely undetected in one of your samples, that sample will still be included, just recording that nothing's there (all values being 0):
 	```
 	apfamet.sub_project_by_model(project, model_names)
 	#For example:
 	subproject1 = apfamet.sub_project_by_model(myproject, ["RNA_pol_Rpb2_1","RNA_pol_Rpb2_6"])
 	```
+	
 	You may wish to use your metadata to make a subproject - every sample which is above or below a certain threshold, or that you have tagged in a certain way with a keyword, can be put into a subproject. Allowed operators for comparing to metadata include `:.>` (greater than), `:.<` (less than), `:.==` (equal to), `:.!=` (not equal to), `:.>=` (greater than or equal to), `:.<=` (less than or equal to).
 	```
 	apfamet.sub_project_by_metadata(project, parameter, operator, value)
@@ -128,6 +130,7 @@ To load a project that was previously saved use this command, specifying the `ba
 	#You can also use keywords in your project_table to easily make subprojects easy later. Let's say that we had marked certain samples as "marine" under :Type, then we could extract those using:
 	subproject2 = apfamet.sub_project_by_metadata(myproject,:Type,:.==,"marine")
 	```
+	
 	Once you have multiple subprojects you may wish to combine them again. This can be achieved with the following function:
 	```
 	combined_project = apfamet.merge_projects(project1, project2)
