@@ -147,7 +147,7 @@ To load a project that was previously saved use this command, specifying the `ba
 	```
 13. Once you have sub projects, you can determine whether or not there's a significant difference in the abundance of a certain HMM in between the two sub projects using the [Mann-Whitney _U_ test](https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test):
 	```
-	mann_whitney_compare_projects(project1,project2,modelname)
+	apfamet.mann_whitney_compare_projects(project1,project2,modelname)
 	#For example, to find the difference in abundance between two sets of samples labeled as type "Holocene" and type "glacial":
 	holocene_subproject = apfamet.sub_project_by_metadata(project_noseqinfo, :Type, .==, "Holocene")
 	glacial_subproject = apfamet.sub_project_by_metadata(project_noseqinfo, :Type, .==, "glacial")
@@ -173,7 +173,7 @@ To load a project that was previously saved use this command, specifying the `ba
 	
 	You can also perform a Mann-Whitney _U_ test to check for significant differences between HMMs in the same project.
 	```
-	mann_whitney_compare_models(project,model1,model2)
+	apfamet.mann_whitney_compare_models(project,model1,model2)
 	```
 
 ##How apfamet's normalisation works 
