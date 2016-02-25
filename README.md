@@ -92,6 +92,7 @@ To load a project that was previously saved use this command, specifying the `ba
 	```
 	
 	![plotcorrelation()](https://github.com/ianpgm/apfamet/blob/master/doc/plotcorrelation_example.png)
+	
 	Now you might want to check how well the HMM abundance correlates with the metadata parameter. You can do that with the following command to find the [Pearson correlation coefficient](https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient):
 	```
 	pearson_correlation(project,modelname,parameter)
@@ -170,6 +171,10 @@ To load a project that was previously saved use this command, specifying the `ba
 	#This shows a "very significant" rejection of the null hypothesis that the abundance of "POR" (Pyruvate ferredoxin/flavodoxin oxidoreductase) in both of these samples came from the same population, i.e. they're different.
 	```
 	
+	You can also perform a Mann-Whitney _U_ test to check for significant differences between HMMs in the same project.
+	```
+	mann_whitney_compare_models(project,model1,model2)
+	```
 
 ##How apfamet's normalisation works 
 Apfamet uses the gene encoding RNA polymerase beta subunit (_rpoB_) to normalise counts in metagenomes. _rpoB_ is a universal, single-copy gene in prokaryotes, and thus a good basis for normalisation and comparison between data sets. There are seven pfam models apfamet uses to detect the RpoB protein sequence, these are:
