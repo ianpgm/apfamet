@@ -90,7 +90,16 @@ To load a project that was previously saved use this command, specifying the `ba
 	correlplot = apfamet.plotcorrelation(["MCR_alpha","Na_H_antiporter"],:CH4_mM,my_project)
 	Gadfly.draw(Gadfly.PDF("correlplot.pdf",5Gadfly.inch,5Gadfly.inch),correlplot)
 	```
-![plotcorrelation()](https://github.com/ianpgm/apfamet/blob/master/doc/plotcorrelation_example.png)
+	
+	![plotcorrelation()](https://github.com/ianpgm/apfamet/blob/master/doc/plotcorrelation_example.png)
+	Now you might want to check how well the HMM abundance correlates with the metadata parameter. You can do that with the following command to find the [Pearson correlation coefficient](https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient):
+	```
+	pearson_correlation(project,modelname,parameter)
+	#For example:
+	apfamet.pearson_correlation(my_project,"MCR_alpha",:CH4_mM)
+	0.9631441371066918
+	#The Pearson correlation coefficient for methane and MCR_alpha in the pictured example is 0.9631441371066918.
+	```
 10. Apfamet currently has a quick and crude principal-components-analysis method built in. It shows the two components with the most variation, but not how much variation those components actually show (like a scree plot). It's basically just good for getting a quick overview of your data. More correct multivariate statistical analysis can be carried out using Julia's [MultivariateStats package](https://github.com/JuliaStats/MultivariateStats.jl).
 	
 	```
@@ -135,6 +144,31 @@ To load a project that was previously saved use this command, specifying the `ba
 	```
 	combined_project = apfamet.merge_projects(project1, project2)
 	```
+13. Once you have sub projects, you can determine whether or not there's a significant difference in the abundance of a certain HMM in between the two sub projects using the [Mann-Whitney _U_ test](https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test):
+	```
+	mann_whitney_compare_projects(project1,project2,modelname)
+	#For example, to find the difference in abundance between two sets of samples labeled as type "Holocene" and type "glacial":
+	holocene_subproject = apfamet.sub_project_by_metadata(project_noseqinfo, :Type, .==, "Holocene")
+	glacial_subproject = apfamet.sub_project_by_metadata(project_noseqinfo, :Type, .==, "glacial")
+	apfamet.mann_whitney_compare_projects(holocene_subproject,glacial_subproject,"POR")
+	Exact Mann-Whitney U test
+	-------------------------
+	Population details:
+	    parameter of interest:   Location parameter (pseudomedian)
+	    value under h_0:         0
+	    point estimate:          -1.1667896845343033
+
+	Test summary:
+	    outcome with 95% confidence: reject h_0
+	    two-sided p-value:           0.001554001554001554 (very significant)
+
+	Details:
+	    number of observations in each group: [5,8]
+	    Mann-Whitney-U statistic:             0.0
+	    rank sums:                            [15.0,76.0]
+	    adjustment for ties:                  0.0
+	#This shows a "very significant" rejection of the null hypothesis that the abundance of "POR" (Pyruvate ferredoxin/flavodoxin oxidoreductase) in both of these samples came from the same population, i.e. they're different.
+	```
 	
 
 ##How apfamet's normalisation works 
@@ -146,7 +180,9 @@ For each metagenomic sample, the number of reads for each of those models is fou
 
 ![normalisation example](https://github.com/ianpgm/apfamet/blob/master/doc/normalisation_plot.png)
 
-Linear regression is performed (as represented by the line) using [Julia's GLM package](https://github.com/JuliaStats/GLM.jl) and the slope is taken as the value of reads/length for rpoB in that sample. Then, for every HMM found in the metagenomic sample, a reads/length figure is calculated based on the length of the HMM in the database and the number of reads that HMM hits in the metagenome. Then reads/length in the HMM is divided by reads/length in the rpoB, to define an abundance for each HMM in "rpoB equivalents". Since there's on average one rpoB in every genome, then one rpoB equivalent should be roughly equivalent to every genome in the metagenome having one copy of that HMM (on average). This unit (rpoB) makes metagenomes comparable based on a natural internal standard, in spite of different numbers of reads, qualities, and other variations from sample to sample.
+Linear regression is performed (as represented by the line) using [Julia's GLM package](https://github.com/JuliaStats/GLM.jl) and the slope is taken as the value of reads/length for rpoB in that sample. Then, for every HMM found in the metagenomic sample, a reads/length figure is calculated based on the length of the HMM in the database and the number of reads that HMM hits in the metagenome. Then reads/length in the HMM is divided by reads/length in the _rpoB_, to define an abundance for each HMM in "rpoB equivalents". Since there's one _rpoB_ copy in every prokaryotic genome, then one _rpoB_ equivalent should be roughly equivalent to every genome in the metagenome having one copy of that HMM (on average). This unit (_rpoB_) makes metagenomes comparable based on a natural internal standard, in spite of different numbers of reads, qualities, and other variations from sample to sample.
+
+This same normalisation procedure is also effective for metatranscriptomes. As a gene that is generally constitutively expressed and a prerequisite for transcription itself, _rpoB_ is also a good basis for the normalisation of transcript abundances between samples.
 
 ##Roadmap
 Features planned for apfamet in the future include:

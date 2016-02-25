@@ -1,35 +1,3 @@
-module apfamet
-
-using DataFrames
-using GLM
-using Gadfly
-using Compose
-using MultivariateStats
-
-#using FTPClient
-#using GZip
-
-#Using a PyCall/Biopython solution to translation and sequencing reading/writing for the time being due to apparent bugs in BioJulia's translate function (see https://github.com/BioJulia/Bio.jl/issues/133) and lack of stop codons in amino acids (https://github.com/BioJulia/Bio.jl/issues/134)
-
-include(joinpath(Pkg.dir("apfamet"),"src","pycall_translation_function.jl"))
-include(joinpath(Pkg.dir("apfamet"),"src","hmmer_function.jl"))
-include(joinpath(Pkg.dir("apfamet"),"src","pycall_extract_seqs.jl"))
-include(joinpath(Pkg.dir("apfamet"),"src","plotting.jl"))
-include(joinpath(Pkg.dir("apfamet"),"src","sub_project.jl"))
-include(joinpath(Pkg.dir("apfamet"),"src","statistics.jl"))
-include(joinpath(Pkg.dir("apfamet"),"src","newproject.jl"))
-include(joinpath(Pkg.dir("apfamet"),"src","database.jl"))
-
-
-
-
-
-function locate_default_database()
-	print(joinpath(Pkg.dir("apfamet"),"db"))
-end
-
-
-
 function prepare_pfam_database(path_to_pfam_database="")
 	if path_to_pfam_database==""
 		path_to_pfam_database = joinpath(Pkg.dir("apfamet"),"db","Pfam-A.hmm")
@@ -75,9 +43,4 @@ function get_pfam_database()
 #	unzipped_output = open(default_pfam_database_location*"Pfam-A.hmm", "w")
 #	gzipped_file = GZip.open(default_pfam_database_location*"Pfam-A.hmm.gz")
 #	write(unzipped_output, readall(gzipped_file))
-end
-
-#Loading base data
-
-
 end

@@ -18,6 +18,10 @@ function extract_seqs(seq_IDs, filenames, format)
 end
 
 function extract_nt_seqs(models,project,filenames,output;format="fastq")
+	if size(project["seq_info_table"]) == (0,0)
+		error("This project contains no sequence information table. Rerun new_project() with seqinfo=true to be able to extract sequences")
+	end
+	
 	seqs_to_retrieve = []
 	for model in models
 		append!(seqs_to_retrieve, project["seq_info_table"][project["seq_info_table"][:model] .== model, :seqID])
@@ -29,6 +33,10 @@ function extract_nt_seqs(models,project,filenames,output;format="fastq")
 end
 
 function extract_aa_seqs(models,project,filenames,output;format="fasta")
+	if size(project["seq_info_table"]) == (0,0)
+		error("This project contains no sequence information table. Rerun new_project() with seqinfo=true to be able to extract sequences")
+	end
+	
 	nt_seqs_to_retrieve = []
 	translations = []
 	aa_seqs_to_retrieve = []
